@@ -5,10 +5,7 @@ import java.io.PrintWriter
 import scala.util.Using
 
 object Main:
-
-  // ============================================================
   // Data Models
-  // ============================================================
   final case class AccidentRecord(
       year: Int,
       province: String,
@@ -82,14 +79,7 @@ object Main:
       transformReport: TransformReport,
       summaryReport: SummaryReport
   )
-
-  // ============================================================
-  // PURE FUNCTIONS SECTION
-  // ============================================================
-
-  // ---------------------------
   // CSV Parser (Pure)
-  // ---------------------------
   def parseCsvLine(line: String): List[String] =
     @annotation.tailrec
     def loop(
@@ -111,9 +101,7 @@ object Main:
 
     loop(line.toList, "", false, Nil)
 
-  // ---------------------------
-  // Safe Parsing (Pure)
-  // ---------------------------
+  // Parsing
   def safeInt(s: String): Option[Int] =
     Try(s.trim.replace(",", "").toInt).toOption
 
@@ -127,9 +115,7 @@ object Main:
   ): Option[String] =
     headerMap.get(name).flatMap(fields.lift)
 
-  // ---------------------------
-  // Parse + Clean Validation (Pure)
-  // ---------------------------
+  // Parse + Clean 
   def parseRecord(
       line: String,
       headerMap: Map[String, Int]
@@ -180,9 +166,7 @@ object Main:
   ): Int =
     lines.count(line => parseRecord(line, headerMap).isLeft)
 
-  // ---------------------------
-  // Transform (Pure)
-  // ---------------------------
+  // Transform
   def enrichRecord(r: AccidentRecord): EnrichedRecord =
     val severityScore =
       (r.deaths * 5) + (r.seriousInjuries * 3) + r.minorInjuries
@@ -219,9 +203,7 @@ object Main:
   def countRemovedZeroCoordinates(data: Vector[AccidentRecord]): Int =
     data.count(r => r.latitude == 0.0 || r.longitude == 0.0)
 
-  // ---------------------------
-  // Summary (Pure)
-  // ---------------------------
+  // Summary
   def summarizeSeq(data: Vector[EnrichedRecord]): SummaryResult =
     val totalAccidents = data.size
     val totalDeaths = data.map(_.deaths).sum
@@ -278,9 +260,7 @@ object Main:
       top5Provinces = top5Provinces
     )
 
-  // ---------------------------
-  // CSV Output Builders (Pure)
-  // ---------------------------
+  // CSV Output
   def csvEscape(s: String): String =
     "\"" + s.replace("\"", "\"\"") + "\""
 
@@ -324,9 +304,7 @@ object Main:
 
     (baseRows ++ provinceRows).mkString("\n")
 
-  // ---------------------------
-  // Reporting String Builders (Pure)
-  // ---------------------------
+  // Reporting
   def lineSeparator: String =
     "------------------------------------------------------------"
 
@@ -378,25 +356,7 @@ $lineSeparator"""
 $provinceText
 ความเร็ว -> Seq: ${"%.3f".format(report.seqTimeMs)} ms | Parallel: ${"%.3f".format(report.parTimeMs)} ms
 $lineSeparator"""
-
-  def renderFinalOverview(filePath: String, mode: String, rawRows: Int): String =
-    s"""=========== ROAD ACCIDENT ETL PIPELINE ===========
-ไฟล์ที่ใช้: $filePath
-โหมดการทำงาน: $mode
-จำนวนข้อมูลดิบก่อนประมวลผล: $rawRows แถว"""
-
-  def renderAllDoneSummary: String =
-    s"""สรุปการทำงานทั้งหมด
-- Clean: คัดข้อมูลเสียออก และสร้าง cleaned_data.csv
-- Transform: เพิ่ม severityScore และ riskLevel และสร้าง transformed_data.csv
-- Summary: สรุปสถิติรวม และสร้าง summary_data.csv
-- ไฟล์ CSV ต้นฉบับไม่ถูกแก้ไข โปรแกรมอ่านอย่างเดียว
-$lineSeparator"""
-
-  // ---------------------------
-  // Benchmark Wrapper (Impure by nature of timing,
-  // but isolated outside core transformation logic)
-  // ---------------------------
+  // Benchmark Wrapper
   def benchmark[A](block: => A): (A, Double) =
     val start = System.nanoTime()
     val result = block
@@ -404,10 +364,7 @@ $lineSeparator"""
     val elapsedMs = (end - start) / 1e6
     (result, elapsedMs)
 
-  // ============================================================
   // PIPELINE ORCHESTRATION
-  // ============================================================
-
   def runClean(
       dataLines: Vector[String],
       headerMap: Map[String, Int]
@@ -492,10 +449,7 @@ $lineSeparator"""
       summaryReport = summaryReport
     )
 
-  // ============================================================
-  // I/O SECTION
-  // ============================================================
-
+  // I/O 
   def readUtf8Lines(filePath: String): Either[String, Vector[String]] =
     Using(Source.fromFile(filePath, "UTF-8")) { source =>
       source.getLines().toVector
@@ -517,9 +471,7 @@ $lineSeparator"""
       _ <- writeTextFile("summary_data.csv", summaryCsvContent(summary))
     yield ()
 
-  // ============================================================
   // MAIN
-  // ============================================================
   def main(args: Array[String]): Unit =
     val mode =
       if args.nonEmpty then args(0).toLowerCase
@@ -539,8 +491,6 @@ $lineSeparator"""
           val headerMap = header.zipWithIndex.toMap
           val dataLines = lines.tail
 
-          println(renderFinalOverview(filePath, mode, dataLines.size))
-          println()
           println("ตัวอย่างข้อมูลดิบ 1 แถว:")
           println(dataLines.headOption.getOrElse("No data"))
           println(lineSeparator)
@@ -586,5 +536,3 @@ $lineSeparator"""
               println(renderSummaryReport(summaryReport))
 
               exportOutputs(cleaned, transformed, summary)
-
-              println(renderAllDoneSummary)
