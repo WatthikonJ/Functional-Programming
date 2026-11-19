@@ -1,35 +1,30 @@
 # Traffic Accident Data Pipeline — Scala 3
 
-A data processing project demonstrating **functional programming** and **sequential vs. parallel processing** on traffic accident CSV data.
+A traffic accident data analysis project using functional programming and sequential/parallel processing.
 
-## What it does
-- Parse and validate traffic accident records from a CSV dataset
-- Clean invalid input and transform records into structured Scala case classes
-- Enrich each record with a severity score and risk level
-- Summarize accident totals, injuries, fatalities and top provinces
-- Compare sequential and parallel execution times and validate that the results agree
+## Features
+- Read and validate traffic accident records from CSV
+- Clean and transform data into Scala case classes
+- Calculate severity scores and risk levels
+- Summarize accident totals, injuries, deaths and provinces
+- Compare sequential and parallel processing results
 
-## Technology
-**Scala 3 · sbt · Scala Parallel Collections · CSV**
+## Tech Stack
+- Scala 3
+- sbt
+- Scala Parallel Collections
+- CSV
 
-## Run
-Install a compatible JDK and `sbt`, then:
+## Project Structure
+- `src/main/scala/Main.scala` — data processing and analysis
+- `src/test/scala/` — tests
+- `accidentdataset.csv` — dataset
+- `build.sbt` — build configuration
+
+## Run Locally
 
 ```bash
 sbt compile
 sbt run
 sbt test
 ```
-
-The dataset `accidentdataset.csv` is included in the repository.
-
-## Repository layout
-- `src/main/scala/Main.scala` — parsing, cleaning, transformations, analysis and benchmarking
-- `src/test/scala/` — tests
-- `accidentdataset.csv` — sample data for the pipeline
-- `build.sbt` — Scala build configuration
-
-## Skills demonstrated
-Functional data transformations, immutable case classes, safe parsing with `Option`/`Either`, error handling, parallel collections, and exploratory data aggregation.
-
-> **Note:** This is an educational data processing project; timing results depend on the machine and dataset.
